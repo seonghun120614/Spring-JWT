@@ -1,4 +1,4 @@
-package io.github.seonghun.springjwt.security.userpass;
+package io.github.seonghun.springjwt.security.userpwd;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,4 +1,4 @@
-package io.github.seonghun.springjwt.security.userpass;
+package io.github.seonghun.springjwt.security.userpwd;
 
 import io.github.seonghun.springjwt.domain.CustomUserDetails;
 import io.github.seonghun.springjwt.domain.User;
@@ -29,14 +29,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                                                 .map(SimpleGrantedAuthority::new)        // String → GrantedAuthority
                                                 .collect(Collectors.toSet());
 
-        return CustomUserDetails.builder()
-                                .username(user.getUsername())
-                                .password(user.getPassword())
-                                .authorities(authorities)
-                                .accountNonExpired(true)
-                                .accountNonLocked(true)
-                                .credentialsNonExpired(true)
-                                .enabled(true)
-                                .build();
+        return new CustomUserDetails(user.getUsername(),
+                                     user.getPassword(),
+                                     authorities);
     }
 }

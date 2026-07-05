@@ -1,4 +1,4 @@
-package io.github.seonghun.springjwt.security.userpass;
+package io.github.seonghun.springjwt.security.userpwd;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

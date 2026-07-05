@@ -2,11 +2,13 @@ package io.github.seonghun.springjwt.config;
 
 import io.github.seonghun.springjwt.config.properties.CookieProperty;
 import io.github.seonghun.springjwt.config.properties.JwtProperty;
-import io.github.seonghun.springjwt.security.userpass.CustomUsernamePasswordFilter;
-import io.github.seonghun.springjwt.security.userpass.CustomUserDetailsService;
-import io.github.seonghun.springjwt.security.userpass.UsernamePasswordAuthenticationFailureHandler;
-import io.github.seonghun.springjwt.security.userpass.UsernamePasswordAuthenticationManager;
-import io.github.seonghun.springjwt.security.userpass.UsernamePasswordAuthenticationSuccessHandler;
+import io.github.seonghun.springjwt.security.jwt.JwtAuthenticationFilter;
+import io.github.seonghun.springjwt.security.jwt.JwtRefreshFilter;
+import io.github.seonghun.springjwt.security.userpwd.CustomUsernamePasswordFilter;
+import io.github.seonghun.springjwt.security.userpwd.CustomUserDetailsService;
+import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationFailureHandler;
+import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationManager;
+import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationSuccessHandler;
 import io.github.seonghun.springjwt.util.CookieHandler;
 import io.github.seonghun.springjwt.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,9 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   CustomUsernamePasswordFilter usernamePasswordFilter) throws Exception {
+                                                   CustomUsernamePasswordFilter usernamePasswordFilter,
+                                                   JwtAuthenticationFilter jwtAuthenticationFilter,
+                                                   JwtRefreshFilter jwtRefreshFilter) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
@@ -44,6 +48,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAt(usernamePasswordFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtRefreshFilter, JwtAuthenticationFilter.class)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }

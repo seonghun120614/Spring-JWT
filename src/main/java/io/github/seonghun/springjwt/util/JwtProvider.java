@@ -1,17 +1,17 @@
 package io.github.seonghun.springjwt.util;
 
 import io.github.seonghun.springjwt.config.properties.JwtProperty;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,24 +27,9 @@ public class JwtProvider {
     }
 
     public String createAccessToken(String username,
-                                    Collection<? extends GrantedAuthority> authorities) {
-        return createToken(username, authorities, jwtProperty.accessExpireMilliSeconds());
-    }
-
-    public String createRefreshToken(String username,
-                                     Collection<? extends GrantedAuthority> authorities) {
-        return createToken(username, authorities, jwtProperty.refreshExpireMilliSeconds());
-    }
-
-    private String createToken(String username,
-                              Collection<? extends GrantedAuthority> authorities,
-                              long expireMilliSeconds) {
+                                    Set<String> roles) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expireMilliSeconds);
-
-        String roles = authorities.stream()
-                                  .map(GrantedAuthority::getAuthority)
-                                  .collect(Collectors.joining(","));
+        Date expiry = new Date(now.getTime() + jwtProperty.accessExpireMilliSeconds());
 
         return Jwts.builder()
                    .subject(username)
@@ -53,6 +38,30 @@ public class JwtProvider {
                    .expiration(expiry)
                    .signWith(key)
                    .compact();
+    }
+
+    public String createRefreshToken(String username,
+                                     Set<String> roles) {
+        String jti = UUID.randomUUID().toString();
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + jwtProperty.refreshExpireMilliSeconds());
+
+        return Jwts.builder()
+                   .id(jti)
+                   .subject(username)
+                   .claim("roles", roles)
+                   .issuedAt(now)
+                   .expiration(expiry)
+                   .signWith(key)
+                   .compact();
+    }
+
+    public Claims parse(String token) {
+        return Jwts.parser()
+                   .verifyWith(key)
+                   .build()
+                   .parseSignedClaims(token)
+                   .getPayload();
     }
 
     public long getAccessExpirySeconds() {

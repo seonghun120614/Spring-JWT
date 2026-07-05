@@ -8,3 +8,9 @@ cookie:
   http-only: true
   same-site: "Strict"
   path: "/"
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

@@ -1,4 +1,4 @@
-package io.github.seonghun.springjwt.security.userpass;
+package io.github.seonghun.springjwt.security.userpwd;
 
 import io.github.seonghun.springjwt.domain.CustomUserDetails;
 import io.github.seonghun.springjwt.util.CookieHandler;
@@ -12,7 +12,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UsernamePasswordAuthenticationSuccessHandler
@@ -29,10 +32,12 @@ public class UsernamePasswordAuthenticationSuccessHandler
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String name = Objects.requireNonNull(userDetails).getUsername();
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        Set<String> roles = authentication.getAuthorities().stream()
+                                          .map(GrantedAuthority::getAuthority)
+                                          .collect(Collectors.toSet());
 
-        String accessToken = jwtProvider.createAccessToken(name, authorities);
-        String refreshToken = jwtProvider.createRefreshToken(name, authorities);
+        String accessToken = jwtProvider.createAccessToken(name, roles);
+        String refreshToken = jwtProvider.createRefreshToken(name, roles);
 
         var accessCookie = cookieHandler.createCookie("access_token",
                                                                  accessToken,

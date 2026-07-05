@@ -1,4 +1,4 @@
-package io.github.seonghun.springjwt.security.userpass;
+package io.github.seonghun.springjwt.security.userpwd;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -57,7 +57,8 @@ public class CustomUsernamePasswordFilter extends AbstractAuthenticationProcessi
         validate(loginRequest);
         UsernamePasswordAuthentication authRequest
                 = new UsernamePasswordAuthentication(loginRequest.username(), loginRequest.password());
-        return this.getAuthenticationManager().authenticate(authRequest);
+        var auth = this.getAuthenticationManager().authenticate(authRequest);
+        return auth;
     }
 
     private void validate(LoginRequest req) {

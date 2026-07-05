@@ -1,7 +1,7 @@
 package io.github.seonghun.springjwt.domain;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,13 +10,13 @@ import java.util.Collection;
 
 @Setter
 @Getter
-@Builder
+@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
-    Collection<? extends GrantedAuthority> authorities;
-    String password;
-    String username;
-    boolean accountNonExpired;
-    boolean accountNonLocked;
-    boolean credentialsNonExpired;
-    boolean enabled;
+    final String username;
+    final String password;
+    final Collection<? extends GrantedAuthority> authorities;
+    boolean accountNonExpired = true;
+    boolean accountNonLocked = true;
+    boolean credentialsNonExpired = true;
+    boolean enabled = true;
 }
