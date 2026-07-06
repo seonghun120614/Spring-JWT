@@ -40,20 +40,23 @@ public class JwtProvider {
                    .compact();
     }
 
-    public String createRefreshToken(String username,
-                                     Set<String> roles) {
+    public String[] createRefreshToken(String username,
+                                       Set<String> roles) {
         String jti = UUID.randomUUID().toString();
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtProperty.refreshExpireMilliSeconds());
 
-        return Jwts.builder()
-                   .id(jti)
-                   .subject(username)
-                   .claim("roles", roles)
-                   .issuedAt(now)
-                   .expiration(expiry)
-                   .signWith(key)
-                   .compact();
+        return new String[] {
+                jti,
+                Jwts.builder()
+                    .id(jti)
+                    .subject(username)
+                    .claim("roles", roles)
+                    .issuedAt(now)
+                    .expiration(expiry)
+                    .signWith(key)
+                        .compact()
+        };
     }
 
     public Claims parse(String token) {

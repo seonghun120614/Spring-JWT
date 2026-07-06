@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Component
+@Deprecated
 public class JwtBlackRepositoryImpl implements JwtBlackRepository {
     private final ConcurrentMap<String, Long> store = new ConcurrentHashMap<>();
 

@@ -1,8 +1,10 @@
 package io.github.seonghun.springjwt.controller;
 
 import io.github.seonghun.springjwt.repository.JwtBlackRepository;
+import io.github.seonghun.springjwt.service.TokenBlacklistService;
 import io.github.seonghun.springjwt.util.CookieHandler;
 import io.github.seonghun.springjwt.util.JwtProvider;
+import io.github.seonghun.springjwt.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,8 +23,8 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @RequiredArgsConstructor
 public class SecurityController {
     private final JwtProvider jwtProvider;
-    private final JwtBlackRepository jwtBlackRepository;
     private final CookieHandler cookieHandler;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @GetMapping("/")
     public ResponseEntity<Void> home() {
@@ -40,14 +42,14 @@ public class SecurityController {
         ));
     }
 
-    @PostMapping("/")
+    @PostMapping("/api/logout")
     public ResponseEntity<Void> logout(@CookieValue("refresh_token") String refreshToken,
                                        HttpServletResponse response) {
         if (refreshToken != null) {
             try {
                 Claims claims = jwtProvider.parse(refreshToken);
-                long expiredAt = claims.getExpiration().getTime();
-                jwtBlackRepository.black(claims.getId(), expiredAt);
+                long remainingMillis = claims.getExpiration().getTime() - System.currentTimeMillis();
+                tokenBlacklistService.blacklist(claims.getId(), remainingMillis);
             } catch (JwtException | IllegalArgumentException ignored) { }
         }
 

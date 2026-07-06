@@ -9,6 +9,7 @@ import io.github.seonghun.springjwt.security.userpwd.CustomUserDetailsService;
 import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationFailureHandler;
 import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationManager;
 import io.github.seonghun.springjwt.security.userpwd.UsernamePasswordAuthenticationSuccessHandler;
+import io.github.seonghun.springjwt.service.RefreshTokenService;
 import io.github.seonghun.springjwt.util.CookieHandler;
 import io.github.seonghun.springjwt.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import tools.jackson.databind.ObjectMapper;
         JwtProperty.class
 })
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    CustomUsernamePasswordFilter usernamePasswordFilter,
@@ -40,7 +42,7 @@ public class SecurityConfig {
                                                    JwtRefreshFilter jwtRefreshFilter) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/login", "/api/refresh", "/api/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(AbstractHttpConfigurer::disable)
@@ -59,7 +61,8 @@ public class SecurityConfig {
             CookieHandler cookieHandler,
             JwtProvider jwtProvider,
             ObjectMapper objectMapper,
-            DaoAuthenticationProvider daoAuthenticationProvider
+            DaoAuthenticationProvider daoAuthenticationProvider,
+            RefreshTokenService refreshTokenService
     ) {
         final var usernamePasswordAuthenticationManager
                 = new UsernamePasswordAuthenticationManager(daoAuthenticationProvider);
@@ -67,7 +70,9 @@ public class SecurityConfig {
                                                                       objectMapper);
 
         var usernamePasswordAuthenticationSuccessHandler
-                = new UsernamePasswordAuthenticationSuccessHandler(jwtProvider, cookieHandler);
+                = new UsernamePasswordAuthenticationSuccessHandler(refreshTokenService,
+                                                                   jwtProvider,
+                                                                   cookieHandler);
         var usernamePasswordAuthenticationFailureHandler
                 = new UsernamePasswordAuthenticationFailureHandler(objectMapper);
 

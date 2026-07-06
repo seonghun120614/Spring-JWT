@@ -26,10 +26,8 @@ public class UsernamePasswordAuthenticationFailureHandler
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-
         ErrorResponse body = new ErrorResponse(HttpServletResponse.SC_UNAUTHORIZED,
                                                "인증에 실패하였습니다.");
-
         objectMapper.writeValue(response.getWriter(), body);
     }
 

@@ -1,6 +1,7 @@
 package io.github.seonghun.springjwt.security.userpwd;
 
 import io.github.seonghun.springjwt.domain.CustomUserDetails;
+import io.github.seonghun.springjwt.service.RefreshTokenService;
 import io.github.seonghun.springjwt.util.CookieHandler;
 import io.github.seonghun.springjwt.util.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +20,7 @@ import java.util.stream.Collectors;
 public class UsernamePasswordAuthenticationSuccessHandler
         implements AuthenticationSuccessHandler {
 
+    private final RefreshTokenService refreshTokenService;
     private final JwtProvider jwtProvider;
     private final CookieHandler cookieHandler;
 
@@ -37,13 +37,15 @@ public class UsernamePasswordAuthenticationSuccessHandler
                                           .collect(Collectors.toSet());
 
         String accessToken = jwtProvider.createAccessToken(name, roles);
-        String refreshToken = jwtProvider.createRefreshToken(name, roles);
+        String[] jtiRefreshToken = jwtProvider.createRefreshToken(name, roles);
+
+        refreshTokenService.save(name, jtiRefreshToken[0]);
 
         var accessCookie = cookieHandler.createCookie("access_token",
-                                                                 accessToken,
-                                                                 jwtProvider.getAccessExpirySeconds());
+                                                      accessToken,
+                                                      jwtProvider.getAccessExpirySeconds());
         var refreshCookie = cookieHandler.createCookie("refresh_token",
-                                                       refreshToken,
+                                                       jtiRefreshToken[1],
                                                        jwtProvider.getRefreshExpirySeconds());
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
